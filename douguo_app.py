@@ -7,6 +7,7 @@ import requests
 import json
 import time
 from multiprocessing import Queue
+from douguo_mongodb import mongo_info
 
 
 queue_list = Queue()
@@ -92,20 +93,47 @@ def handle_menu_list(data):
         menu_info = {}
         menu_info["食材"] = data["keyword"]
         if menu_dict["type"] == 13:
-            menu_info["author_name"] = menu_dict['r']['an']
-            menu_info["id"] = menu_dict['r']['id']
-            # 菜式描述，可能为空
-            menu_info["story"] = menu_dict['r']['cookstory'].replace(" ", "")
-            menu_info["name"] = menu_dict['r']['n']
-            # 主料
-            menu_info["major"] = menu_dict['r']['major']
-            # 多少人做过
-            menu_info["recommendation_tag"] = menu_dict['r']['recommendation_tag']
-            print(menu_info)
+            handle_memu(data, menu_dict, menu_info)
+            # 入库
+            print("    正在处理食谱: "+ data["keyword"])
+            mongo_info.insert_item(menu_info)
         else:
             continue
 
+
+def handle_memu(data, menu_dict, menu_info):
+    """包装menu信息，以便入库"""
+    menu_info["author_name"] = menu_dict['r']['an']
+    menu_info["id"] = menu_dict['r']['id']
+    # 菜式描述，可能为空
+    menu_info["story"] = menu_dict['r']['cookstory'].replace(" ", "")
+    menu_info["name"] = menu_dict['r']['n']
+    # 主料
+    menu_info["major"] = menu_dict['r']['major']
+    # 多少人做过
+    menu_info["recommendation_tag"] = menu_dict['r']['recommendation_tag']
+    # print(menu_info)
+
+    # 访问详情页，并获取数据
+    detail_url = 'http://api.douguo.net/recipe/detail/' + str(menu_info["id"])
+    detail_data = {
+        "client": "4",
+        # "_session": "563100941637355757010762041",
+        "author_id": "0",
+        "_vs": "2803",
+        "_ext": '{"query":{"id":' + str(menu_info["id"]) + ', "kw":' + str(
+            data["keyword"]) + ', "idx":"4", "src":"2803", "type":"13"}}'
+    }
+    detail_response = handle_request(url=detail_url, data=detail_data)
+    # print(detail_response.text)
+    detail_response_dict = json.loads(detail_response.text)
+    menu_info['tips'] = detail_response_dict['result']['recipe']['tips']
+    menu_info['cookstep'] = detail_response_dict['result']['recipe']['cookstep']
+    # print(json.dumps(menu_info).encode('utf8').decode('unicode_escape'))
+
 if __name__ == '__main__':
     handle_index()
-    print(queue_list.qsize())
-    handle_menu_list(queue_list.get())
+    print("剩余处理食材：" + queue_list.qsize())
+    while(queue_list.qsize()):
+        handle_menu_list(queue_list.get())
+        print("剩余处理食材：" + queue_list.qsize())
