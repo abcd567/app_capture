@@ -7,6 +7,8 @@ import requests
 import json
 import time
 from multiprocessing import Queue
+from concurrent.futures import ThreadPoolExecutor
+
 from douguo_mongodb import mongo_info
 
 
@@ -133,7 +135,14 @@ def handle_memu(data, menu_dict, menu_info):
 
 if __name__ == '__main__':
     handle_index()
-    print("剩余处理食材：" + queue_list.qsize())
-    while(queue_list.qsize()):
-        handle_menu_list(queue_list.get())
-        print("剩余处理食材：" + queue_list.qsize())
+    # print("剩余处理食材：" + queue_list.qsize())
+    # while(queue_list.qsize()):
+    #     handle_menu_list(queue_list.get())
+    #     print("剩余处理食材：" + queue_list.qsize())
+
+    # 改用线程池
+    pool = ThreadPoolExecutor(max_workers=2)
+    while queue_list.qsize() > 0:
+        # 没有ip代理，做慢点
+        time.sleep(2)
+        pool.submit(handle_menu_list, queue_list.get())
