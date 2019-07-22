@@ -9,12 +9,12 @@ from appium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 
 cap = {
-  "platformName": "Android",
-  "platformVersion": "7.1.2",
-  "deviceName": "127.0.0.1:62001",
-  "appPackage": "com.tal.kaoyan",
-  "appActivity": "com.tal.kaoyan.ui.activity.SplashActivity",
-  "noReset": True
+    "platformName": "Android",
+    "platformVersion": "7.1.2",
+    "deviceName": "127.0.0.1:62001",
+    "appPackage": "com.tal.kaoyan",
+    "appActivity": "com.tal.kaoyan.ui.activity.SplashActivity",
+    "noReset": True
 }
 
 # 连接 appium 服务器，并打开应用
