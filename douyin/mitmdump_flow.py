@@ -2,7 +2,6 @@
 __author__ = "吴飞鸿"
 __date__ = "2019/7/21 20:43"
 
-
 import json
 
 import pymongo
@@ -13,7 +12,9 @@ from pymongo.collection import Collection
 
 def response(flow):
     """
-        截获处理数据流
+        截获处理数据流。
+        # 进入python 环境
+        # mitmdump -s <.py> -p <端口> 运行截获需要的response
     """
     # if 'aweme/v1/user/following/list/' in flow.request.url:
         # with open('user.txt', 'w') as f:

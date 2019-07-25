@@ -1,0 +1,6 @@
+进入python 环境
+mitmdump -s <.py> -p <端口>
+设置模拟器mitmproxy代理端口
+py文件截获api的response进行解析
+
+pycharm运行appium脚本下拉粉丝列表获取更多api接口
